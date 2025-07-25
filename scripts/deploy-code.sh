@@ -33,21 +33,21 @@ log_error() {
 get_web_app_name() {
     if [ -n "$1" ]; then
         WEB_APP_NAME="$1"
-        log_info "Using web app name from parameter: $WEB_APP_NAME"
+        log_info "Using web app name from parameter: ${WEB_APP_NAME}"
     elif [ -d "terraform" ]; then
         # Try to get from Terraform state first
         cd terraform
         WEB_APP_NAME=$(terraform state show azurerm_linux_web_app.main 2>/dev/null | grep '^[[:space:]]*name[[:space:]]*=' | sed 's/.*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/' || echo "")
         cd ..
         
-        if [ -n "$WEB_APP_NAME" ] && [ "$WEB_APP_NAME" != "null" ]; then
-            log_info "Using web app name from Terraform state: $WEB_APP_NAME"
+        if [ -n "${WEB_APP_NAME}" ] && [ "${WEB_APP_NAME}" != "null" ]; then
+            log_info "Using web app name from Terraform state: ${WEB_APP_NAME}"
         else
             # Fall back to azure-resources.json
             if [ -f "azure-resources.json" ]; then
                 WEB_APP_NAME=$(jq -r '.webAppName' azure-resources.json 2>/dev/null || echo "")
-                if [ -n "$WEB_APP_NAME" ] && [ "$WEB_APP_NAME" != "null" ]; then
-                    log_info "Using web app name from azure-resources.json: $WEB_APP_NAME"
+                if [ -n "${WEB_APP_NAME}" ] && [ "${WEB_APP_NAME}" != "null" ]; then
+                    log_info "Using web app name from azure-resources.json: ${WEB_APP_NAME}"
                 else
                     log_error "Could not read web app name from azure-resources.json"
                     echo "Usage: $0 <web-app-name>"
@@ -63,8 +63,8 @@ get_web_app_name() {
         fi
     elif [ -f "azure-resources.json" ]; then
         WEB_APP_NAME=$(jq -r '.webAppName' azure-resources.json 2>/dev/null || echo "")
-        if [ -n "$WEB_APP_NAME" ] && [ "$WEB_APP_NAME" != "null" ]; then
-            log_info "Using web app name from azure-resources.json: $WEB_APP_NAME"
+        if [ -n "${WEB_APP_NAME}" ] && [ "${WEB_APP_NAME}" != "null" ]; then
+            log_info "Using web app name from azure-resources.json: ${WEB_APP_NAME}"
         else
             log_error "Could not read web app name from azure-resources.json"
             echo "Usage: $0 <web-app-name>"
@@ -87,34 +87,34 @@ get_resource_group() {
         RESOURCE_GROUP_NAME=$(terraform state show azurerm_resource_group.main 2>/dev/null | grep '^[[:space:]]*name[[:space:]]*=' | sed 's/.*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/' || echo "")
         cd ..
         
-        if [ -n "$RESOURCE_GROUP_NAME" ] && [ "$RESOURCE_GROUP_NAME" != "null" ]; then
-            log_info "Using resource group from Terraform state: $RESOURCE_GROUP_NAME"
+        if [ -n "${RESOURCE_GROUP_NAME}" ] && [ "${RESOURCE_GROUP_NAME}" != "null" ]; then
+            log_info "Using resource group from Terraform state: ${RESOURCE_GROUP_NAME}"
         else
             # Fall back to azure-resources.json
             if [ -f "azure-resources.json" ]; then
                 RESOURCE_GROUP_NAME=$(jq -r '.resourceGroup' azure-resources.json 2>/dev/null || echo "")
-                if [ -n "$RESOURCE_GROUP_NAME" ] && [ "$RESOURCE_GROUP_NAME" != "null" ]; then
-                    log_info "Using resource group from azure-resources.json: $RESOURCE_GROUP_NAME"
+                if [ -n "${RESOURCE_GROUP_NAME}" ] && [ "${RESOURCE_GROUP_NAME}" != "null" ]; then
+                    log_info "Using resource group from azure-resources.json: ${RESOURCE_GROUP_NAME}"
                 else
                     RESOURCE_GROUP_NAME="aas-dotnet-8-webapp-rg"
-                    log_warning "Could not read resource group from azure-resources.json, using default: $RESOURCE_GROUP_NAME"
+                    log_warning "Could not read resource group from azure-resources.json, using default: ${RESOURCE_GROUP_NAME}"
                 fi
             else
                 RESOURCE_GROUP_NAME="aas-dotnet-8-webapp-rg"
-                log_warning "No configuration found, using default resource group: $RESOURCE_GROUP_NAME"
+                log_warning "No configuration found, using default resource group: ${RESOURCE_GROUP_NAME}"
             fi
         fi
     elif [ -f "azure-resources.json" ]; then
         RESOURCE_GROUP_NAME=$(jq -r '.resourceGroup' azure-resources.json 2>/dev/null || echo "")
-        if [ -n "$RESOURCE_GROUP_NAME" ] && [ "$RESOURCE_GROUP_NAME" != "null" ]; then
-            log_info "Using resource group from azure-resources.json: $RESOURCE_GROUP_NAME"
+        if [ -n "${RESOURCE_GROUP_NAME}" ] && [ "${RESOURCE_GROUP_NAME}" != "null" ]; then
+            log_info "Using resource group from azure-resources.json: ${RESOURCE_GROUP_NAME}"
         else
             RESOURCE_GROUP_NAME="aas-dotnet-8-webapp-rg"
-            log_warning "Could not read resource group from azure-resources.json, using default: $RESOURCE_GROUP_NAME"
+            log_warning "Could not read resource group from azure-resources.json, using default: ${RESOURCE_GROUP_NAME}"
         fi
     else
         RESOURCE_GROUP_NAME="aas-dotnet-8-webapp-rg"
-        log_warning "azure-resources.json not found, using default resource group: $RESOURCE_GROUP_NAME"
+        log_warning "azure-resources.json not found, using default resource group: ${RESOURCE_GROUP_NAME}"
     fi
 }
 
@@ -134,12 +134,12 @@ check_prerequisites() {
     
     # Check .NET version
     DOTNET_VERSION=$(dotnet --version)
-    if [[ ! "$DOTNET_VERSION" =~ ^8\. ]]; then
-        log_error "Expected .NET 8 SDK, but found version: $DOTNET_VERSION"
+    if [[ ! "${DOTNET_VERSION}" =~ ^8\. ]]; then
+        log_error "Expected .NET 8 SDK, but found version: ${DOTNET_VERSION}"
         log_error "Please ensure .NET 8 SDK is installed and global.json is configured correctly"
         exit 1
     fi
-    log_info "Using .NET version: $DOTNET_VERSION"
+    log_info "Using .NET version: ${DOTNET_VERSION}"
     
     # Check if logged in to Azure
     if ! az account show &> /dev/null; then
@@ -170,10 +170,10 @@ check_prerequisites() {
 
 # Verify web app exists
 verify_web_app() {
-    log_info "Verifying web app exists: $WEB_APP_NAME"
+    log_info "Verifying web app exists: ${WEB_APP_NAME}"
     
-    if ! az webapp show --name $WEB_APP_NAME --resource-group $RESOURCE_GROUP_NAME &> /dev/null; then
-        log_error "Web app '$WEB_APP_NAME' not found in resource group '$RESOURCE_GROUP_NAME'"
+    if ! az webapp show --name "${WEB_APP_NAME}" --resource-group "${RESOURCE_GROUP_NAME}" &> /dev/null; then
+        log_error "Web app '${WEB_APP_NAME}' not found in resource group '${RESOURCE_GROUP_NAME}'"
         echo "Please run './scripts/create-azure-resources.sh' first to create the web app"
         exit 1
     fi
@@ -225,14 +225,14 @@ create_deployment_package() {
 
 # Deploy to Azure
 deploy_to_azure() {
-    log_info "Deploying to Azure Web App: $WEB_APP_NAME"
+    log_info "Deploying to Azure Web App: ${WEB_APP_NAME}"
     log_info "🕐 Deployment started at: $(date '+%Y-%m-%d %H:%M:%S')"
     log_info "⏱️  Expected deployment time: ~2 minutes (can take up to 5 minutes on initial deploy)"
     echo
     
     az webapp deploy \
-        --resource-group $RESOURCE_GROUP_NAME \
-        --name $WEB_APP_NAME \
+        --resource-group "${RESOURCE_GROUP_NAME}" \
+        --name "${WEB_APP_NAME}" \
         --src-path app.zip \
         --type zip
     
@@ -254,19 +254,19 @@ show_deployment_info() {
     log_info "Deployment completed successfully!"
     echo
     echo "=== Deployment Information ==="
-    echo "Web App: $WEB_APP_NAME"
-    echo "Resource Group: $RESOURCE_GROUP_NAME"
+    echo "Web App: ${WEB_APP_NAME}"
+    echo "Resource Group: ${RESOURCE_GROUP_NAME}"
     echo
     echo "=== Web App URLs ==="
-    echo "Base URL: https://$WEB_APP_NAME.azurewebsites.net"
-    echo "Index Page: https://$WEB_APP_NAME.azurewebsites.net/"
-    echo "Swagger UI: https://$WEB_APP_NAME.azurewebsites.net/swagger"
-    echo "Hello endpoint: https://$WEB_APP_NAME.azurewebsites.net/api/v1/hello"
-    echo "Random endpoint: https://$WEB_APP_NAME.azurewebsites.net/api/v1/random"
-    echo "Error endpoint: https://$WEB_APP_NAME.azurewebsites.net/api/v1/error"
+    echo "Base URL: https://${WEB_APP_NAME}.azurewebsites.net"
+    echo "Index Page: https://${WEB_APP_NAME}.azurewebsites.net/"
+    echo "Swagger UI: https://${WEB_APP_NAME}.azurewebsites.net/swagger"
+    echo "Hello endpoint: https://${WEB_APP_NAME}.azurewebsites.net/api/v1/hello"
+    echo "Random endpoint: https://${WEB_APP_NAME}.azurewebsites.net/api/v1/random"
+    echo "Error endpoint: https://${WEB_APP_NAME}.azurewebsites.net/api/v1/error"
     echo
     echo "=== Next Steps ==="
-    echo "1. Test your endpoints using './scripts/test-endpoints.sh $WEB_APP_NAME'"
+    echo "1. Test your endpoints using './scripts/test-endpoints.sh ${WEB_APP_NAME}'"
     echo "2. Monitor your application in Azure Portal"
     echo "3. View logs in Application Insights"
     echo

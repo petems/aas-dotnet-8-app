@@ -176,3 +176,23 @@ publish/
 # Deployment packages
 *.zip
 app.zip
+
+## Test Results
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+## GitHub Actions
+.github/workflows/*.log
+
+## TFLint
+.tflint.d/
+
+## Terraform
+*.tfplan
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl

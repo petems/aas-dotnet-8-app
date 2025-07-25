@@ -56,30 +56,30 @@ check_prerequisites() {
 
 # Create resource group
 create_resource_group() {
-    log_info "Creating resource group: $RESOURCE_GROUP_NAME"
+    log_info "Creating resource group: ${RESOURCE_GROUP_NAME}"
     
-    if az group show --name $RESOURCE_GROUP_NAME &> /dev/null; then
-        log_warning "Resource group $RESOURCE_GROUP_NAME already exists"
+    if az group show --name "${RESOURCE_GROUP_NAME}" &> /dev/null; then
+        log_warning "Resource group ${RESOURCE_GROUP_NAME} already exists"
     else
-        az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
+        az group create --name "${RESOURCE_GROUP_NAME}" --location "${LOCATION}"
         log_success "Resource group created successfully"
     fi
 }
 
 # Create Application Insights
 create_app_insights() {
-    log_info "Creating Application Insights: $APP_INSIGHTS_NAME"
+    log_info "Creating Application Insights: ${APP_INSIGHTS_NAME}"
     
     az monitor app-insights component create \
-        --app $APP_INSIGHTS_NAME \
-        --location $LOCATION \
-        --resource-group $RESOURCE_GROUP_NAME \
+        --app "${APP_INSIGHTS_NAME}" \
+        --location "${LOCATION}" \
+        --resource-group "${RESOURCE_GROUP_NAME}" \
         --application-type web
     
     # Get the connection string
     APP_INSIGHTS_CONNECTION_STRING=$(az monitor app-insights component show \
-        --app $APP_INSIGHTS_NAME \
-        --resource-group $RESOURCE_GROUP_NAME \
+        --app "${APP_INSIGHTS_NAME}" \
+        --resource-group "${RESOURCE_GROUP_NAME}" \
         --query connectionString \
         --output tsv)
     
@@ -88,12 +88,12 @@ create_app_insights() {
 
 # Create App Service Plan
 create_app_service_plan() {
-    log_info "Creating App Service Plan: $SERVICE_PLAN_NAME"
+    log_info "Creating App Service Plan: ${SERVICE_PLAN_NAME}"
     
     az appservice plan create \
-        --name $SERVICE_PLAN_NAME \
-        --resource-group $RESOURCE_GROUP_NAME \
-        --location $LOCATION \
+        --name "${SERVICE_PLAN_NAME}" \
+        --resource-group "${RESOURCE_GROUP_NAME}" \
+        --location "${LOCATION}" \
         --sku B1 \
         --is-linux
     
@@ -102,12 +102,12 @@ create_app_service_plan() {
 
 # Create Web App
 create_web_app() {
-    log_info "Creating Web App: $WEB_APP_NAME"
+    log_info "Creating Web App: ${WEB_APP_NAME}"
     
     az webapp create \
-        --name $WEB_APP_NAME \
-        --resource-group $RESOURCE_GROUP_NAME \
-        --plan $SERVICE_PLAN_NAME \
+        --name "${WEB_APP_NAME}" \
+        --resource-group "${RESOURCE_GROUP_NAME}" \
+        --plan "${SERVICE_PLAN_NAME}" \
         --runtime "DOTNETCORE:8.0" \
         --deployment-local-git
     
@@ -120,14 +120,14 @@ configure_web_app() {
     
     # Set Application Insights connection string
     az webapp config appsettings set \
-        --name $WEB_APP_NAME \
-        --resource-group $RESOURCE_GROUP_NAME \
-        --settings "APPLICATIONINSIGHTS_CONNECTION_STRING=$APP_INSIGHTS_CONNECTION_STRING"
+        --name "${WEB_APP_NAME}" \
+        --resource-group "${RESOURCE_GROUP_NAME}" \
+        --settings "APPLICATIONINSIGHTS_CONNECTION_STRING=${APP_INSIGHTS_CONNECTION_STRING}"
     
     # Set other required settings
     az webapp config appsettings set \
-        --name $WEB_APP_NAME \
-        --resource-group $RESOURCE_GROUP_NAME \
+        --name "${WEB_APP_NAME}" \
+        --resource-group "${RESOURCE_GROUP_NAME}" \
         --settings \
         "WEBSITE_RUN_FROM_PACKAGE=1" \
         "DOTNET_ENVIRONMENT=Production"
@@ -141,16 +141,16 @@ save_resource_info() {
     
     cat > azure-resources.json << EOF
 {
-  "resourceGroup": "$RESOURCE_GROUP_NAME",
-  "webAppName": "$WEB_APP_NAME",
-  "appInsightsName": "$APP_INSIGHTS_NAME",
-  "servicePlanName": "$SERVICE_PLAN_NAME",
-  "location": "$LOCATION",
-  "baseUrl": "https://$WEB_APP_NAME.azurewebsites.net",
-  "swaggerUrl": "https://$WEB_APP_NAME.azurewebsites.net/swagger",
-  "helloEndpoint": "https://$WEB_APP_NAME.azurewebsites.net/api/v1/hello",
-  "randomEndpoint": "https://$WEB_APP_NAME.azurewebsites.net/api/v1/random",
-  "errorEndpoint": "https://$WEB_APP_NAME.azurewebsites.net/api/v1/error"
+  "resourceGroup": "${RESOURCE_GROUP_NAME}",
+  "webAppName": "${WEB_APP_NAME}",
+  "appInsightsName": "${APP_INSIGHTS_NAME}",
+  "servicePlanName": "${SERVICE_PLAN_NAME}",
+  "location": "${LOCATION}",
+  "baseUrl": "https://${WEB_APP_NAME}.azurewebsites.net",
+  "swaggerUrl": "https://${WEB_APP_NAME}.azurewebsites.net/swagger",
+  "helloEndpoint": "https://${WEB_APP_NAME}.azurewebsites.net/api/v1/hello",
+  "randomEndpoint": "https://${WEB_APP_NAME}.azurewebsites.net/api/v1/random",
+  "errorEndpoint": "https://${WEB_APP_NAME}.azurewebsites.net/api/v1/error"
 }
 EOF
     
@@ -162,26 +162,26 @@ show_resource_info() {
     log_info "Azure resources created successfully!"
     echo
     echo "=== Resource Information ==="
-    echo "Resource Group: $RESOURCE_GROUP_NAME"
-    echo "Web App: $WEB_APP_NAME"
-    echo "Application Insights: $APP_INSIGHTS_NAME"
-    echo "Location: $LOCATION"
+    echo "Resource Group: ${RESOURCE_GROUP_NAME}"
+    echo "Web App: ${WEB_APP_NAME}"
+    echo "Application Insights: ${APP_INSIGHTS_NAME}"
+    echo "Location: ${LOCATION}"
     echo
     echo "=== Web App URLs ==="
-    echo "Base URL: https://$WEB_APP_NAME.azurewebsites.net"
-    echo "Swagger UI: https://$WEB_APP_NAME.azurewebsites.net/swagger"
-    echo "Hello endpoint: https://$WEB_APP_NAME.azurewebsites.net/api/v1/hello"
-    echo "Random endpoint: https://$WEB_APP_NAME.azurewebsites.net/api/v1/random"
-    echo "Error endpoint: https://$WEB_APP_NAME.azurewebsites.net/api/v1/error"
+    echo "Base URL: https://${WEB_APP_NAME}.azurewebsites.net"
+    echo "Swagger UI: https://${WEB_APP_NAME}.azurewebsites.net/swagger"
+    echo "Hello endpoint: https://${WEB_APP_NAME}.azurewebsites.net/api/v1/hello"
+    echo "Random endpoint: https://${WEB_APP_NAME}.azurewebsites.net/api/v1/random"
+    echo "Error endpoint: https://${WEB_APP_NAME}.azurewebsites.net/api/v1/error"
     echo
     echo "=== Next Steps ==="
     echo "1. Run './scripts/deploy-code.sh' to deploy your application"
-    echo "2. Test your endpoints using './scripts/test-endpoints.sh $WEB_APP_NAME'"
+    echo "2. Test your endpoints using './scripts/test-endpoints.sh ${WEB_APP_NAME}'"
     echo "3. Monitor your application in Azure Portal"
     echo "4. View logs in Application Insights"
     echo
     echo "=== Cleanup ==="
-    echo "To delete all resources: az group delete --name $RESOURCE_GROUP_NAME --yes"
+    echo "To delete all resources: az group delete --name ${RESOURCE_GROUP_NAME} --yes"
 }
 
 # Main function

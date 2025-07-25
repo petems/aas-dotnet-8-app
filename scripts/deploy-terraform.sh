@@ -127,7 +127,7 @@ check_prerequisites() {
     
     # Check Terraform version
     TERRAFORM_VERSION=$(terraform version -json | jq -r '.terraform_version')
-    log_info "Using Terraform version: $TERRAFORM_VERSION"
+    log_info "Using Terraform version: ${TERRAFORM_VERSION}"
     
     # Check if Azure CLI is installed
     if ! command -v az &> /dev/null; then
@@ -149,15 +149,15 @@ check_prerequisites() {
     
     # Check .NET version
     DOTNET_VERSION=$(dotnet --version)
-    if [[ ! "$DOTNET_VERSION" =~ ^8\. ]]; then
-        log_error "Expected .NET 8 SDK, but found version: $DOTNET_VERSION"
+    if [[ ! "${DOTNET_VERSION}" =~ ^8\. ]]; then
+        log_error "Expected .NET 8 SDK, but found version: ${DOTNET_VERSION}"
         exit 1
     fi
-    log_info "Using .NET version: $DOTNET_VERSION"
+    log_info "Using .NET version: ${DOTNET_VERSION}"
     
     # Check if Terraform directory exists
-    if [ ! -d "$TERRAFORM_DIR" ]; then
-        log_error "Terraform directory '$TERRAFORM_DIR' not found"
+    if [ ! -d "${TERRAFORM_DIR}" ]; then
+        log_error "Terraform directory '${TERRAFORM_DIR}' not found"
         exit 1
     fi
     
@@ -168,7 +168,7 @@ check_prerequisites() {
 init_terraform() {
     log_info "Initializing Terraform..."
     
-    cd "$TERRAFORM_DIR"
+    cd "${TERRAFORM_DIR}"
     
     # Initialize Terraform
     terraform init
@@ -182,19 +182,19 @@ plan_terraform() {
     
     # Build terraform plan arguments
     PLAN_ARGS=""
-    if [ -n "$WEB_APP_NAME" ]; then
-        PLAN_ARGS="$PLAN_ARGS -var=web_app_name=\"$WEB_APP_NAME\""
+    if [ -n "${WEB_APP_NAME}" ]; then
+        PLAN_ARGS="${PLAN_ARGS} -var=web_app_name=\"${WEB_APP_NAME}\""
     fi
-    if [ -n "$RESOURCE_GROUP_NAME" ]; then
-        PLAN_ARGS="$PLAN_ARGS -var=resource_group_name=\"$RESOURCE_GROUP_NAME\""
+    if [ -n "${RESOURCE_GROUP_NAME}" ]; then
+        PLAN_ARGS="${PLAN_ARGS} -var=resource_group_name=\"${RESOURCE_GROUP_NAME}\""
     fi
-    if [ -n "$APP_INSIGHTS_NAME" ]; then
-        PLAN_ARGS="$PLAN_ARGS -var=app_insights_name=\"$APP_INSIGHTS_NAME\""
+    if [ -n "${APP_INSIGHTS_NAME}" ]; then
+        PLAN_ARGS="${PLAN_ARGS} -var=app_insights_name=\"${APP_INSIGHTS_NAME}\""
     fi
     
     # Run terraform plan
-    if [ -n "$PLAN_ARGS" ]; then
-        eval "terraform plan $PLAN_ARGS"
+    if [ -n "${PLAN_ARGS}" ]; then
+        eval "terraform plan ${PLAN_ARGS}"
     else
         terraform plan
     fi
@@ -208,19 +208,19 @@ deploy_infrastructure() {
     
     # Build terraform apply arguments
     APPLY_ARGS="-auto-approve"
-    if [ -n "$WEB_APP_NAME" ]; then
-        APPLY_ARGS="$APPLY_ARGS -var=web_app_name=\"$WEB_APP_NAME\""
+    if [ -n "${WEB_APP_NAME}" ]; then
+        APPLY_ARGS="${APPLY_ARGS} -var=web_app_name=\"${WEB_APP_NAME}\""
     fi
-    if [ -n "$RESOURCE_GROUP_NAME" ]; then
-        APPLY_ARGS="$APPLY_ARGS -var=resource_group_name=\"$RESOURCE_GROUP_NAME\""
+    if [ -n "${RESOURCE_GROUP_NAME}" ]; then
+        APPLY_ARGS="${APPLY_ARGS} -var=resource_group_name=\"${RESOURCE_GROUP_NAME}\""
     fi
-    if [ -n "$APP_INSIGHTS_NAME" ]; then
-        APPLY_ARGS="$APPLY_ARGS -var=app_insights_name=\"$APP_INSIGHTS_NAME\""
+    if [ -n "${APP_INSIGHTS_NAME}" ]; then
+        APPLY_ARGS="${APPLY_ARGS} -var=app_insights_name=\"${APP_INSIGHTS_NAME}\""
     fi
     
     # Run terraform apply
-    if [ -n "$APPLY_ARGS" ]; then
-        eval "terraform apply $APPLY_ARGS"
+    if [ -n "${APPLY_ARGS}" ]; then
+        eval "terraform apply ${APPLY_ARGS}"
     else
         terraform apply -auto-approve
     fi
@@ -237,9 +237,9 @@ get_deployment_info() {
     RESOURCE_GROUP_NAME=$(terraform output -raw resource_group_name)
     WEB_APP_URL=$(terraform output -raw web_app_url)
     
-    log_info "Web App: $WEB_APP_NAME"
-    log_info "Resource Group: $RESOURCE_GROUP_NAME"
-    log_info "URL: $WEB_APP_URL"
+    log_info "Web App: ${WEB_APP_NAME}"
+    log_info "Resource Group: ${RESOURCE_GROUP_NAME}"
+    log_info "URL: ${WEB_APP_URL}"
     
     log_success "Deployment information retrieved from Terraform state"
 }
@@ -258,18 +258,18 @@ deploy_code() {
         
         cd ..
         
-        log_info "Web App: $WEB_APP_NAME"
-        log_info "Resource Group: $RESOURCE_GROUP_NAME"
+        log_info "Web App: ${WEB_APP_NAME}"
+        log_info "Resource Group: ${RESOURCE_GROUP_NAME}"
     fi
     
-    if [ -z "$WEB_APP_NAME" ] || [ -z "$RESOURCE_GROUP_NAME" ]; then
+    if [ -z "${WEB_APP_NAME}" ] || [ -z "${RESOURCE_GROUP_NAME}" ]; then
         log_error "Could not determine web app name or resource group from Terraform state"
         log_error "Please ensure Terraform is initialized and resources are deployed"
         exit 1
     fi
     
     # Run the code deployment script
-    ./scripts/deploy-code.sh "$WEB_APP_NAME"
+    ./scripts/deploy-code.sh "${WEB_APP_NAME}"
     
     log_success "Application code deployed successfully"
 }
@@ -289,14 +289,14 @@ show_deployment_info() {
         
         cd ..
         
-        if [ -n "$WEB_APP_NAME" ] && [ -n "$WEB_APP_URL" ]; then
-            echo "Web App: $WEB_APP_NAME"
-            echo "Base URL: $WEB_APP_URL"
-            echo "Index Page: $WEB_APP_URL/"
-            echo "Swagger UI: $WEB_APP_URL/swagger"
-            echo "Hello endpoint: $WEB_APP_URL/api/v1/hello"
-            echo "Random endpoint: $WEB_APP_URL/api/v1/random"
-            echo "Error endpoint: $WEB_APP_URL/api/v1/error"
+        if [ -n "${WEB_APP_NAME}" ] && [ -n "${WEB_APP_URL}" ]; then
+            echo "Web App: ${WEB_APP_NAME}"
+            echo "Base URL: ${WEB_APP_URL}"
+            echo "Index Page: ${WEB_APP_URL}/"
+            echo "Swagger UI: ${WEB_APP_URL}/swagger"
+            echo "Hello endpoint: ${WEB_APP_URL}/api/v1/hello"
+            echo "Random endpoint: ${WEB_APP_URL}/api/v1/random"
+            echo "Error endpoint: ${WEB_APP_URL}/api/v1/error"
         else
             echo "Could not retrieve deployment information from Terraform state"
         fi
@@ -304,8 +304,8 @@ show_deployment_info() {
     
     echo
     echo "=== Next Steps ==="
-    if [ -n "$WEB_APP_NAME" ]; then
-        echo "1. Test your endpoints using './scripts/test-endpoints.sh $WEB_APP_NAME'"
+    if [ -n "${WEB_APP_NAME}" ]; then
+        echo "1. Test your endpoints using './scripts/test-endpoints.sh ${WEB_APP_NAME}'"
     else
         echo "1. Test your endpoints using './scripts/test-endpoints.sh <web-app-name>'"
     fi
@@ -324,15 +324,15 @@ main() {
     
     check_prerequisites
     
-    if [ "$DEPLOY_INFRASTRUCTURE" = true ]; then
+    if [ "${DEPLOY_INFRASTRUCTURE}" = true ]; then
         init_terraform
         plan_terraform
         
-        if [ "$SKIP_CONFIRM" = false ]; then
+        if [ "${SKIP_CONFIRM}" = false ]; then
             echo
             read -p "Do you want to proceed with the deployment? (y/N): " -n 1 -r
             echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            if [[ ! ${REPLY} =~ ^[Yy]$ ]]; then
                 log_info "Deployment cancelled"
                 exit 0
             fi
@@ -342,7 +342,7 @@ main() {
         get_deployment_info
     fi
     
-    if [ "$DEPLOY_CODE" = true ]; then
+    if [ "${DEPLOY_CODE}" = true ]; then
         deploy_code
     fi
     
