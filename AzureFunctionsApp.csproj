@@ -7,7 +7,7 @@
     <AssemblyName>AzureWebApp</AssemblyName>
     <RootNamespace>AzureWebApp</RootNamespace>
     <LangVersion>latest</LangVersion>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(Configuration)' == 'Release'">linux-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
