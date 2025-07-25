@@ -96,8 +96,15 @@ Or follow the manual deployment steps in the [Deployment Guide](#deployment-guid
 ├── local.settings.json.example  # Example settings template
 ├── scripts/
 │   ├── deploy.sh          # Azure deployment script
+│   ├── deploy-terraform.sh # Terraform deployment script
 │   ├── setup-local.sh     # Local development setup
 │   └── test-endpoints.sh  # Endpoint testing script
+├── terraform/
+│   ├── main.tf            # Main Terraform configuration
+│   ├── variables.tf       # Variable definitions
+│   ├── outputs.tf         # Output definitions
+│   ├── terraform.tfvars.example  # Example variables file
+│   └── README.md          # Terraform documentation
 └── README.md              # This file
 ```
 
@@ -132,7 +139,9 @@ Copy `local.settings.json.example` to `local.settings.json` and update values:
 
 ## Deployment Guide
 
-### Automated Deployment
+The project supports multiple deployment approaches:
+
+### Option 1: Script-Based Deployment (Quick & Simple)
 
 The `scripts/deploy.sh` script handles the complete deployment process:
 
@@ -141,6 +150,16 @@ The `scripts/deploy.sh` script handles the complete deployment process:
 3. App Service Plan setup
 4. Web App deployment
 5. Configuration updates
+
+### Option 2: Terraform Deployment (Infrastructure as Code)
+
+For production environments and team deployments, use Terraform:
+
+1. **Complete Deployment**: `./scripts/deploy-terraform.sh --web-app-name <name>`
+2. **Infrastructure Only**: `./scripts/deploy-terraform.sh --infrastructure-only`
+3. **Code Only**: `./scripts/deploy-terraform.sh --code-only`
+
+See [terraform/README.md](terraform/README.md) for detailed Terraform instructions.
 
 ### Manual Deployment
 
@@ -174,6 +193,13 @@ Deploys application code to existing web app:
 
 ### `scripts/test-endpoints.sh`
 Tests all deployed endpoints to verify they're working correctly.
+
+### `scripts/deploy-terraform.sh`
+Terraform deployment script that handles both infrastructure and code deployment:
+- Initializes and plans Terraform deployment
+- Deploys Azure infrastructure as code
+- Integrates with existing code deployment scripts
+- Provides comprehensive output and deployment information
 
 ## Development
 

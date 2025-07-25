@@ -100,6 +100,16 @@ azure-resources.json
 *.pubxml
 *.pubxml.user
 
+# Terraform files (may contain sensitive data)
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+terraform-deployment.json
+
 # Azure Functions Core Tools
 .func/
 
