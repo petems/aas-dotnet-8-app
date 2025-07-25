@@ -32,6 +32,17 @@ log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+# Check prerequisites
+check_prerequisites() {
+    if ! command -v curl &> /dev/null; then
+        log_error "curl is not installed. Please install it:"
+        log_error "  macOS: brew install curl"
+        log_error "  Ubuntu/Debian: sudo apt-get install curl"
+        log_error "  CentOS/RHEL: sudo yum install curl"
+        exit 1
+    fi
+}
+
 # Test function
 test_endpoint() {
     local endpoint=$1
@@ -61,6 +72,8 @@ test_endpoint() {
 
 # Main test function
 main() {
+    check_prerequisites
+    
     echo "🧪 Testing Azure App Service Web App Endpoints"
     echo "=============================================="
     echo "Web App: $WEB_APP_NAME"

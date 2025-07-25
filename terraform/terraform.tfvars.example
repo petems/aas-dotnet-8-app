@@ -1,0 +1,27 @@
+# Terraform variables for existing infrastructure
+# These match the resources created by our CLI deployment
+
+# Resource naming (matching existing resources)
+resource_group_name = "aas-dotnet-8-webapp-rg"
+location            = "West US 2"
+web_app_name        = "aas-dotnet-8-webapp"
+app_insights_name   = "aas-dotnet-8-insights"
+service_plan_name   = "aas-dotnet-8-plan"
+
+# Configuration
+dotnet_version    = "8.0"
+service_plan_sku  = "B1"
+environment       = "Production"
+
+# Tags
+tags = {
+  Environment = "Production"
+  Project     = "AAS-DotNet-8-App"
+  ManagedBy   = "Terraform"
+  Owner       = "PeterSouter"
+}
+
+# Additional tags (optional)
+additional_tags = {
+  # Add any additional tags here
+} 

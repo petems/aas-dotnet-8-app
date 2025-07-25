@@ -8,6 +8,7 @@
     <RootNamespace>AzureWebApp</RootNamespace>
     <LangVersion>latest</LangVersion>
     <RuntimeIdentifier Condition="'$(Configuration)' == 'Release'">linux-x64</RuntimeIdentifier>
+    <RuntimeIdentifiers Condition="'$(Configuration)' == 'Release'">linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>

@@ -58,6 +58,7 @@ main() {
     
     echo
     log_info "Step 2: Deploying application code..."
+    log_info "🕐 Deployment started at: $(date '+%Y-%m-%d %H:%M:%S')"
     log_info "⏱️  Expected deployment time: ~2 minutes (can take up to 5 minutes on initial deploy)"
     ./scripts/deploy-code.sh
     
