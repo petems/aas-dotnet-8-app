@@ -33,6 +33,7 @@ log_error() {
 TERRAFORM_DIR="terraform"
 WEB_APP_NAME=""
 RESOURCE_GROUP_NAME=""
+APP_INSIGHTS_NAME=""
 DEPLOY_INFRASTRUCTURE=true
 DEPLOY_CODE=true
 SKIP_CONFIRM=false
@@ -46,6 +47,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --resource-group)
             RESOURCE_GROUP_NAME="$2"
+            shift 2
+            ;;
+        --app-insights-name)
+            APP_INSIGHTS_NAME="$2"
             shift 2
             ;;
         --terraform-dir)
@@ -88,6 +93,7 @@ show_help() {
     echo "Options:"
     echo "  --web-app-name NAME     Web app name (required if not in terraform.tfvars)"
     echo "  --resource-group NAME   Resource group name (required if not in terraform.tfvars)"
+    echo "  --app-insights-name NAME Application Insights name (optional)"
     echo "  --terraform-dir DIR     Terraform directory (default: terraform)"
     echo "  --infrastructure-only   Deploy only infrastructure, skip code deployment"
     echo "  --code-only            Deploy only code, skip infrastructure deployment"
@@ -107,6 +113,15 @@ check_prerequisites() {
     # Check if Terraform is installed
     if ! command -v terraform &> /dev/null; then
         log_error "Terraform is not installed. Please install it first: https://www.terraform.io/downloads"
+        exit 1
+    fi
+    
+    # Check for jq (used for JSON parsing)
+    if ! command -v jq &> /dev/null; then
+        log_error "jq is not installed. Please install it:"
+        log_error "  macOS: brew install jq"
+        log_error "  Ubuntu/Debian: sudo apt-get install jq"
+        log_error "  CentOS/RHEL: sudo yum install jq"
         exit 1
     fi
     
@@ -168,15 +183,18 @@ plan_terraform() {
     # Build terraform plan arguments
     PLAN_ARGS=""
     if [ -n "$WEB_APP_NAME" ]; then
-        PLAN_ARGS="$PLAN_ARGS -var=\"web_app_name=$WEB_APP_NAME\""
+        PLAN_ARGS="$PLAN_ARGS -var=web_app_name=\"$WEB_APP_NAME\""
     fi
     if [ -n "$RESOURCE_GROUP_NAME" ]; then
-        PLAN_ARGS="$PLAN_ARGS -var=\"resource_group_name=$RESOURCE_GROUP_NAME\""
+        PLAN_ARGS="$PLAN_ARGS -var=resource_group_name=\"$RESOURCE_GROUP_NAME\""
+    fi
+    if [ -n "$APP_INSIGHTS_NAME" ]; then
+        PLAN_ARGS="$PLAN_ARGS -var=app_insights_name=\"$APP_INSIGHTS_NAME\""
     fi
     
     # Run terraform plan
     if [ -n "$PLAN_ARGS" ]; then
-        terraform plan $PLAN_ARGS
+        eval "terraform plan $PLAN_ARGS"
     else
         terraform plan
     fi
@@ -191,15 +209,18 @@ deploy_infrastructure() {
     # Build terraform apply arguments
     APPLY_ARGS="-auto-approve"
     if [ -n "$WEB_APP_NAME" ]; then
-        APPLY_ARGS="$APPLY_ARGS -var=\"web_app_name=$WEB_APP_NAME\""
+        APPLY_ARGS="$APPLY_ARGS -var=web_app_name=\"$WEB_APP_NAME\""
     fi
     if [ -n "$RESOURCE_GROUP_NAME" ]; then
-        APPLY_ARGS="$APPLY_ARGS -var=\"resource_group_name=$RESOURCE_GROUP_NAME\""
+        APPLY_ARGS="$APPLY_ARGS -var=resource_group_name=\"$RESOURCE_GROUP_NAME\""
+    fi
+    if [ -n "$APP_INSIGHTS_NAME" ]; then
+        APPLY_ARGS="$APPLY_ARGS -var=app_insights_name=\"$APP_INSIGHTS_NAME\""
     fi
     
     # Run terraform apply
     if [ -n "$APPLY_ARGS" ]; then
-        terraform apply $APPLY_ARGS
+        eval "terraform apply $APPLY_ARGS"
     else
         terraform apply -auto-approve
     fi

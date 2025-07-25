@@ -1,7 +1,7 @@
-# Terraform variables file example
-# Copy this file to terraform.tfvars and update the values
+# Terraform variables for existing infrastructure
+# These match the resources created by our CLI deployment
 
-# Resource naming
+# Resource naming (matching existing resources)
 resource_group_name = "aas-dotnet-8-webapp-rg"
 location            = "West US 2"
 web_app_name        = "aas-dotnet-8-webapp"
@@ -18,13 +18,10 @@ tags = {
   Environment = "Production"
   Project     = "AAS-DotNet-8-App"
   ManagedBy   = "Terraform"
-  Owner       = "YourName"
-  CostCenter  = "IT"
+  Owner       = "PeterSouter"
 }
 
 # Additional tags (optional)
 additional_tags = {
   # Add any additional tags here
-  # Backup = "Daily"
-  # Compliance = "SOX"
 } 

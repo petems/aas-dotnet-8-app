@@ -29,11 +29,38 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Get web app name from parameters or azure-resources.json
+# Get web app name from parameters, Terraform state, or azure-resources.json
 get_web_app_name() {
     if [ -n "$1" ]; then
         WEB_APP_NAME="$1"
         log_info "Using web app name from parameter: $WEB_APP_NAME"
+    elif [ -d "terraform" ]; then
+        # Try to get from Terraform state first
+        cd terraform
+        WEB_APP_NAME=$(terraform state show azurerm_linux_web_app.main 2>/dev/null | grep '^[[:space:]]*name[[:space:]]*=' | sed 's/.*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/' || echo "")
+        cd ..
+        
+        if [ -n "$WEB_APP_NAME" ] && [ "$WEB_APP_NAME" != "null" ]; then
+            log_info "Using web app name from Terraform state: $WEB_APP_NAME"
+        else
+            # Fall back to azure-resources.json
+            if [ -f "azure-resources.json" ]; then
+                WEB_APP_NAME=$(jq -r '.webAppName' azure-resources.json 2>/dev/null || echo "")
+                if [ -n "$WEB_APP_NAME" ] && [ "$WEB_APP_NAME" != "null" ]; then
+                    log_info "Using web app name from azure-resources.json: $WEB_APP_NAME"
+                else
+                    log_error "Could not read web app name from azure-resources.json"
+                    echo "Usage: $0 <web-app-name>"
+                    echo "Or run './scripts/create-azure-resources.sh' first to create resources"
+                    exit 1
+                fi
+            else
+                log_error "No web app name provided and no configuration found"
+                echo "Usage: $0 <web-app-name>"
+                echo "Or run './scripts/create-azure-resources.sh' first to create resources"
+                exit 1
+            fi
+        fi
     elif [ -f "azure-resources.json" ]; then
         WEB_APP_NAME=$(jq -r '.webAppName' azure-resources.json 2>/dev/null || echo "")
         if [ -n "$WEB_APP_NAME" ] && [ "$WEB_APP_NAME" != "null" ]; then
@@ -45,16 +72,39 @@ get_web_app_name() {
             exit 1
         fi
     else
-        log_error "No web app name provided and azure-resources.json not found"
+        log_error "No web app name provided and no configuration found"
         echo "Usage: $0 <web-app-name>"
         echo "Or run './scripts/create-azure-resources.sh' first to create resources"
         exit 1
     fi
 }
 
-# Get resource group name
+# Get resource group name from Terraform state or azure-resources.json
 get_resource_group() {
-    if [ -f "azure-resources.json" ]; then
+    if [ -d "terraform" ]; then
+        # Try to get from Terraform state first
+        cd terraform
+        RESOURCE_GROUP_NAME=$(terraform state show azurerm_resource_group.main 2>/dev/null | grep '^[[:space:]]*name[[:space:]]*=' | sed 's/.*name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/' || echo "")
+        cd ..
+        
+        if [ -n "$RESOURCE_GROUP_NAME" ] && [ "$RESOURCE_GROUP_NAME" != "null" ]; then
+            log_info "Using resource group from Terraform state: $RESOURCE_GROUP_NAME"
+        else
+            # Fall back to azure-resources.json
+            if [ -f "azure-resources.json" ]; then
+                RESOURCE_GROUP_NAME=$(jq -r '.resourceGroup' azure-resources.json 2>/dev/null || echo "")
+                if [ -n "$RESOURCE_GROUP_NAME" ] && [ "$RESOURCE_GROUP_NAME" != "null" ]; then
+                    log_info "Using resource group from azure-resources.json: $RESOURCE_GROUP_NAME"
+                else
+                    RESOURCE_GROUP_NAME="aas-dotnet-8-webapp-rg"
+                    log_warning "Could not read resource group from azure-resources.json, using default: $RESOURCE_GROUP_NAME"
+                fi
+            else
+                RESOURCE_GROUP_NAME="aas-dotnet-8-webapp-rg"
+                log_warning "No configuration found, using default resource group: $RESOURCE_GROUP_NAME"
+            fi
+        fi
+    elif [ -f "azure-resources.json" ]; then
         RESOURCE_GROUP_NAME=$(jq -r '.resourceGroup' azure-resources.json 2>/dev/null || echo "")
         if [ -n "$RESOURCE_GROUP_NAME" ] && [ "$RESOURCE_GROUP_NAME" != "null" ]; then
             log_info "Using resource group from azure-resources.json: $RESOURCE_GROUP_NAME"
@@ -94,6 +144,24 @@ check_prerequisites() {
     # Check if logged in to Azure
     if ! az account show &> /dev/null; then
         log_error "Not logged in to Azure. Please run 'az login' first."
+        exit 1
+    fi
+    
+    # Check for jq (used for JSON parsing)
+    if ! command -v jq &> /dev/null; then
+        log_error "jq is not installed. Please install it:"
+        log_error "  macOS: brew install jq"
+        log_error "  Ubuntu/Debian: sudo apt-get install jq"
+        log_error "  CentOS/RHEL: sudo yum install jq"
+        exit 1
+    fi
+    
+    # Check for zip command
+    if ! command -v zip &> /dev/null; then
+        log_error "zip command is not available. Please install it:"
+        log_error "  macOS: brew install zip"
+        log_error "  Ubuntu/Debian: sudo apt-get install zip"
+        log_error "  CentOS/RHEL: sudo yum install zip"
         exit 1
     fi
     
@@ -158,6 +226,7 @@ create_deployment_package() {
 # Deploy to Azure
 deploy_to_azure() {
     log_info "Deploying to Azure Web App: $WEB_APP_NAME"
+    log_info "🕐 Deployment started at: $(date '+%Y-%m-%d %H:%M:%S')"
     log_info "⏱️  Expected deployment time: ~2 minutes (can take up to 5 minutes on initial deploy)"
     echo
     
