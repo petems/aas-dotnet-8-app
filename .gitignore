@@ -172,3 +172,7 @@ Thumbs.db
 *.tmp
 *.temp
 publish/
+
+# Deployment packages
+*.zip
+app.zip
