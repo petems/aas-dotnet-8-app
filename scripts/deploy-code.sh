@@ -117,8 +117,12 @@ verify_web_app() {
 build_application() {
     log_info "Building application..."
     
-    # Clean previous builds
-    dotnet clean --configuration Release
+    # Clean previous builds and output directories manually
+    rm -rf bin/Release
+    rm -rf obj/Release
+    
+    # Restore packages first
+    dotnet restore
     
     # Build the application
     dotnet build --configuration Release
@@ -133,8 +137,8 @@ publish_application() {
     # Clean previous publish
     rm -rf ./publish
     
-    # Publish the application
-    dotnet publish --configuration Release --output ./publish
+    # Publish the application for Linux x64 runtime
+    dotnet publish --configuration Release --runtime linux-x64 --output ./publish --self-contained false
     
     log_success "Application published successfully"
 }

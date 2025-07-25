@@ -104,9 +104,10 @@ terraform/
 The Terraform configuration creates the following Azure resources:
 
 1. **Resource Group** - Container for all resources
-2. **Application Insights** - Monitoring and telemetry
-3. **App Service Plan** - Hosting plan for the web app
-4. **Linux Web App** - The actual web application
+2. **Log Analytics Workspace** - Centralized logging and monitoring
+3. **Application Insights** - Monitoring and telemetry (connected to workspace)
+4. **App Service Plan** - Hosting plan for the web app
+5. **Linux Web App** - The actual web application
 
 ## Outputs
 
@@ -116,6 +117,8 @@ After deployment, Terraform provides these outputs:
 - `swagger_url` - Swagger UI URL
 - `api_endpoints` - All API endpoint URLs
 - `app_insights_connection_string` - Application Insights connection string
+- `log_analytics_workspace_name` - Log Analytics Workspace name
+- `log_analytics_workspace_id` - Log Analytics Workspace resource ID
 - `deployment_info` - Information for deployment scripts
 
 ## Security

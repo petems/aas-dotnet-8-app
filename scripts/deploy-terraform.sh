@@ -220,33 +220,30 @@ get_deployment_info() {
     log_info "Resource Group: $RESOURCE_GROUP_NAME"
     log_info "URL: $WEB_APP_URL"
     
-    # Save deployment info for code deployment
-    cd ..
-    cat > terraform-deployment.json << EOF
-{
-  "webAppName": "$WEB_APP_NAME",
-  "resourceGroup": "$RESOURCE_GROUP_NAME",
-  "webAppUrl": "$WEB_APP_URL"
-}
-EOF
-    
-    log_success "Deployment information saved to terraform-deployment.json"
+    log_success "Deployment information retrieved from Terraform state"
 }
 
 # Deploy application code
 deploy_code() {
     log_info "Deploying application code..."
     
-    cd ..
-    
-    # Use deployment info from Terraform
-    if [ -f "terraform-deployment.json" ]; then
-        WEB_APP_NAME=$(jq -r '.webAppName' terraform-deployment.json)
-        RESOURCE_GROUP_NAME=$(jq -r '.resourceGroup' terraform-deployment.json)
+    # Get deployment info from current Terraform state
+    if [ -d "terraform" ]; then
+        cd terraform
+        
+        # Get outputs from Terraform state
+        WEB_APP_NAME=$(terraform output -raw web_app_name 2>/dev/null || echo "")
+        RESOURCE_GROUP_NAME=$(terraform output -raw resource_group_name 2>/dev/null || echo "")
+        
+        cd ..
+        
+        log_info "Web App: $WEB_APP_NAME"
+        log_info "Resource Group: $RESOURCE_GROUP_NAME"
     fi
     
     if [ -z "$WEB_APP_NAME" ] || [ -z "$RESOURCE_GROUP_NAME" ]; then
-        log_error "Could not determine web app name or resource group"
+        log_error "Could not determine web app name or resource group from Terraform state"
+        log_error "Please ensure Terraform is initialized and resources are deployed"
         exit 1
     fi
     
@@ -262,27 +259,40 @@ show_deployment_info() {
     echo
     echo "=== Deployment Information ==="
     
-    if [ -f "terraform-deployment.json" ]; then
-        WEB_APP_NAME=$(jq -r '.webAppName' terraform-deployment.json)
-        WEB_APP_URL=$(jq -r '.webAppUrl' terraform-deployment.json)
+    # Get information from Terraform state
+    if [ -d "terraform" ]; then
+        cd terraform
         
-        echo "Web App: $WEB_APP_NAME"
-        echo "Base URL: $WEB_APP_URL"
-        echo "Index Page: $WEB_APP_URL/"
-        echo "Swagger UI: $WEB_APP_URL/swagger"
-        echo "Hello endpoint: $WEB_APP_URL/api/v1/hello"
-        echo "Random endpoint: $WEB_APP_URL/api/v1/random"
-        echo "Error endpoint: $WEB_APP_URL/api/v1/error"
+        WEB_APP_NAME=$(terraform output -raw web_app_name 2>/dev/null || echo "")
+        WEB_APP_URL=$(terraform output -raw web_app_url 2>/dev/null || echo "")
+        
+        cd ..
+        
+        if [ -n "$WEB_APP_NAME" ] && [ -n "$WEB_APP_URL" ]; then
+            echo "Web App: $WEB_APP_NAME"
+            echo "Base URL: $WEB_APP_URL"
+            echo "Index Page: $WEB_APP_URL/"
+            echo "Swagger UI: $WEB_APP_URL/swagger"
+            echo "Hello endpoint: $WEB_APP_URL/api/v1/hello"
+            echo "Random endpoint: $WEB_APP_URL/api/v1/random"
+            echo "Error endpoint: $WEB_APP_URL/api/v1/error"
+        else
+            echo "Could not retrieve deployment information from Terraform state"
+        fi
     fi
     
     echo
     echo "=== Next Steps ==="
-    echo "1. Test your endpoints using './scripts/test-endpoints.sh $WEB_APP_NAME'"
+    if [ -n "$WEB_APP_NAME" ]; then
+        echo "1. Test your endpoints using './scripts/test-endpoints.sh $WEB_APP_NAME'"
+    else
+        echo "1. Test your endpoints using './scripts/test-endpoints.sh <web-app-name>'"
+    fi
     echo "2. Monitor your application in Azure Portal"
     echo "3. View logs in Application Insights"
     echo
     echo "=== Cleanup ==="
-    echo "To destroy all resources: cd $TERRAFORM_DIR && terraform destroy"
+    echo "To destroy all resources: cd terraform && terraform destroy"
 }
 
 # Main function
