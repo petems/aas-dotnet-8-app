@@ -1,29 +1,37 @@
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-public partial class Program
-{
-    public static void Main()
-    {
-        var host = new HostBuilder()
-            .ConfigureFunctionsWorkerDefaults()
-            .ConfigureLogging(logging =>
-            {
-                // Set minimum log level to Information
-                logging.SetMinimumLevel(LogLevel.Information);
-                
-                // Add Application Insights if connection string is available
-                var connectionString = Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING");
-                if (!string.IsNullOrEmpty(connectionString))
-                {
-                    logging.AddApplicationInsights(configureTelemetryConfiguration: (config) =>
-                        config.ConnectionString = connectionString, configureApplicationInsightsLoggerOptions: (options) => { });
-                }
-            })
-            .Build();
+var builder = WebApplication.CreateBuilder(args);
 
-        host.Run();
-    }
+// Add services to the container
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configure logging
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+// Add Application Insights if connection string is available
+var connectionString = Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING");
+if (!string.IsNullOrEmpty(connectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        options.ConnectionString = connectionString;
+    });
 }
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles(); // Enable static file serving
+app.UseAuthorization();
+app.MapControllers();
+
+// Fallback route to serve index.html for the root path
+app.MapFallbackToFile("index.html");
+
+app.Run();

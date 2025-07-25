@@ -94,6 +94,12 @@ local.settings.json
 local.settings.*.json
 *.local.json
 
+# Azure Resource Information (may contain sensitive data)
+azure-resources.json
+*.publishsettings
+*.pubxml
+*.pubxml.user
+
 # Azure Functions Core Tools
 .func/
 

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure App Service .NET 8 Web App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .endpoint:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .method {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-right: 1rem;
+        }
+
+        .get { background: #d4edda; color: #155724; }
+        .post { background: #d1ecf1; color: #0c5460; }
+
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 0.5rem;
+            border-radius: 4px;
+            color: #495057;
+            word-break: break-all;
+        }
+
+        .description {
+            margin-top: 0.5rem;
+            color: #6c757d;
+        }
+
+        .links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .status {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tech-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .tech-item strong {
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .links {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Azure App Service .NET 8</h1>
+            <p>A modern ASP.NET Core web application with REST API endpoints</p>
+        </div>
+
+        <div class="content">
+            <div class="status">
+                ✅ <strong>Status:</strong> Application is running successfully
+            </div>
+
+            <div class="section">
+                <h2>📋 Available API Endpoints</h2>
+                
+                <div class="endpoint">
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="method post">POST</span>
+                        <span class="url">/api/v1/hello</span>
+                    </div>
+                    <div class="description">
+                        Returns a welcome message. Supports both GET and POST methods.
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="url">/api/v1/random</span>
+                    </div>
+                    <div class="description">
+                        Returns a random number between 1 and 100.
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div>
+                        <span class="method get">GET</span>
+                        <span class="url">/api/v1/error</span>
+                    </div>
+                    <div class="description">
+                        Throws an exception for testing Application Insights error tracking.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔧 Technology Stack</h2>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <strong>.NET 8</strong><br>
+                        Latest LTS version
+                    </div>
+                    <div class="tech-item">
+                        <strong>ASP.NET Core</strong><br>
+                        Web framework
+                    </div>
+                    <div class="tech-item">
+                        <strong>Azure App Service</strong><br>
+                        Cloud hosting
+                    </div>
+                    <div class="tech-item">
+                        <strong>Application Insights</strong><br>
+                        Monitoring & telemetry
+                    </div>
+                    <div class="tech-item">
+                        <strong>Swagger/OpenAPI</strong><br>
+                        API documentation
+                    </div>
+                    <div class="tech-item">
+                        <strong>REST API</strong><br>
+                        Versioned endpoints
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Quick Links</h2>
+                <div class="links">
+                    <a href="/swagger" class="btn">📖 Swagger Documentation</a>
+                    <a href="/api/v1/hello" class="btn btn-secondary">🧪 Test Hello Endpoint</a>
+                    <a href="/api/v1/random" class="btn btn-secondary">🎲 Test Random Endpoint</a>
+                    <a href="https://portal.azure.com" target="_blank" class="btn btn-secondary">☁️ Azure Portal</a>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Monitoring</h2>
+                <p>This application is integrated with Azure Application Insights for comprehensive monitoring, logging, and performance tracking. You can view telemetry data in the Azure Portal.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
