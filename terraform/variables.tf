@@ -40,7 +40,7 @@ variable "service_plan_sku" {
   description = "App Service Plan SKU"
   type        = string
   default     = "B1"
-  
+
   validation {
     condition     = contains(["F1", "B1", "B2", "B3", "S1", "S2", "S3", "P1V2", "P2V2", "P3V2"], var.service_plan_sku)
     error_message = "Service plan SKU must be one of: F1, B1, B2, B3, S1, S2, S3, P1V2, P2V2, P3V2."
@@ -51,7 +51,7 @@ variable "environment" {
   description = "Environment name"
   type        = string
   default     = "Production"
-  
+
   validation {
     condition     = contains(["Development", "Staging", "Production"], var.environment)
     error_message = "Environment must be one of: Development, Staging, Production."

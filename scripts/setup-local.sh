@@ -35,12 +35,12 @@ fi
 
 # Check .NET version
 DOTNET_VERSION=$(dotnet --version)
-if [[ ! "$DOTNET_VERSION" =~ ^8\. ]]; then
-    log_warning "Expected .NET 8 SDK, but found version: $DOTNET_VERSION"
+if [[ ! "${DOTNET_VERSION}" =~ ^8\. ]]; then
+    log_warning "Expected .NET 8 SDK, but found version: ${DOTNET_VERSION}"
     log_warning "Please ensure .NET 8 SDK is installed and global.json is configured correctly"
     exit 1
 fi
-log_info "Found .NET version: $DOTNET_VERSION"
+log_info "Found .NET version: ${DOTNET_VERSION}"
 
 # Restore dependencies
 log_info "Restoring NuGet packages..."

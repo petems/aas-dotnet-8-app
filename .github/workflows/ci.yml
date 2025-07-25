@@ -1,0 +1,118 @@
+name: CI/CD Pipeline
+
+# This workflow uses Makefile tasks for consistency with local development
+# All tasks are defined in the Makefile and can be run locally with: make ci
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  TERRAFORM_VERSION: '1.6.0'
+
+jobs:
+  dotnet-test:
+    name: .NET Test and Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: make dotnet-restore
+      
+    - name: Build
+      run: make dotnet-build
+      
+    - name: Test
+      run: make dotnet-test
+      
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./coverage
+        fail_ci_if_error: false
+        
+  dotnet-lint:
+    name: .NET Linting and Code Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: make dotnet-restore
+      
+    - name: Lint and format check
+      run: make dotnet-lint
+      
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TERRAFORM_VERSION }}
+        
+    - name: Setup TFLint
+      uses: terraform-linters/setup-tflint@v4
+      with:
+        tflint_version: latest
+        
+    - name: Terraform Format and Validate
+      run: make terraform-fmt terraform-validate
+      
+  shell-script-validation:
+    name: Shell Script Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install ShellCheck
+      run: sudo apt-get update && sudo apt-get install -y shellcheck
+      
+    - name: Validate shell scripts
+      run: make shellcheck
+        
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Trivy
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.48.0
+        
+    - name: Run security scan
+      run: make security-scan
+        
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'

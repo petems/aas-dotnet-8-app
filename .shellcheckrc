@@ -1,0 +1,16 @@
+# Shellcheck configuration
+# Disable warnings that are not relevant for this project
+
+# SC2034: var appears unused. Verify use (or export if used externally)
+disable=SC2034
+
+# SC1091: Not following sourced files
+disable=SC1091
+
+# SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails
+disable=SC2164
+
+# Enable additional checks
+enable=check-unassigned-uppercase
+enable=quote-safe-variables
+enable=require-variable-braces

@@ -1,0 +1,88 @@
+name: Dependency Security Scan
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  push:
+    branches: [ master ]
+    paths:
+      - '**/packages.lock.json'
+      - '**/*.csproj'
+      - '**/requirements*.txt'
+      - '**/package*.json'
+  workflow_dispatch:
+
+jobs:
+  dotnet-security:
+    name: .NET Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: List outdated packages
+      run: dotnet list package --outdated --include-transitive || true
+      
+    - name: List vulnerable packages
+      run: dotnet list package --vulnerable --include-transitive
+      
+    - name: Audit dependencies
+      run: dotnet nuget audit
+      
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+      with:
+        fail-on-severity: moderate
+        
+  terraform-security:
+    name: Terraform Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: terraform/
+        framework: terraform
+        output_format: sarif
+        output_file_path: checkov-results.sarif
+        
+    - name: Upload Checkov scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: checkov-results.sarif
+        
+    - name: Run tfsec
+      uses: aquasecurity/tfsec-sarif-action@v0.1.4
+      with:
+        sarif_file: tfsec-results.sarif
+        working_directory: terraform/
+        
+    - name: Upload tfsec scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: tfsec-results.sarif
