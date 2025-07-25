@@ -7,7 +7,7 @@ set -e  # Exit on any error
 
 # Configuration
 RESOURCE_GROUP_NAME="aas-dotnet-8-functions-rg"
-LOCATION="eastus"
+LOCATION="westus2"
 STORAGE_ACCOUNT_NAME="aasdotnet8storage$(date +%s | tail -c 4)"
 FUNCTION_APP_NAME="aas-dotnet-8-functions-$(date +%s | tail -c 4)"
 APP_INSIGHTS_NAME="aas-dotnet-8-insights-$(date +%s | tail -c 4)"
