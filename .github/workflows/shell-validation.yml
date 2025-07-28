@@ -1,0 +1,27 @@
+name: Shell Script Validation
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ master ]
+    paths: ['scripts/**', '.github/workflows/shell-validation.yml']
+  pull_request:
+    branches: [ master ]
+    paths: ['scripts/**', '.github/workflows/shell-validation.yml']
+
+jobs:
+  shell-script-validation:
+    name: Shell Script Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install ShellCheck
+      run: sudo apt-get update && sudo apt-get install -y shellcheck
+      
+    - name: Validate shell scripts
+      run: make shellcheck 

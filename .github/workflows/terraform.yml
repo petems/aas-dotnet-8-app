@@ -1,0 +1,37 @@
+name: Terraform CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ master ]
+    paths: ['terraform/**', '.github/workflows/terraform.yml']
+  pull_request:
+    branches: [ master ]
+    paths: ['terraform/**', '.github/workflows/terraform.yml']
+
+env:
+  TERRAFORM_VERSION: '1.6.0'
+
+jobs:
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TERRAFORM_VERSION }}
+        
+    - name: Setup TFLint
+      uses: terraform-linters/setup-tflint@v4
+      with:
+        tflint_version: latest
+        
+    - name: Terraform Format and Validate
+      run: make terraform-fmt terraform-validate 
