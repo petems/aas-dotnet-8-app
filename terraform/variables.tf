@@ -87,13 +87,3 @@ variable "alert_email_addresses" {
   type        = list(string)
   default     = []
 }
-
-variable "log_retention_days" {
-  description = "Number of days to retain logs"
-  type        = number
-  default     = 30
-  validation {
-    condition     = var.log_retention_days >= 1 && var.log_retention_days <= 365
-    error_message = "Log retention days must be between 1 and 365."
-  }
-}

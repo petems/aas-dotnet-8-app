@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = "~> 4.0"
     }
   }
 }
@@ -134,9 +134,8 @@ resource "azurerm_monitor_diagnostic_setting" "web_app" {
     category = "AppServicePlatformLogs"
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 
@@ -145,6 +144,7 @@ resource "azurerm_monitor_activity_log_alert" "http_5xx" {
   count               = var.enable_alerts ? 1 : 0
   name                = "${var.web_app_name}-http-5xx-alert"
   resource_group_name = azurerm_resource_group.main.name
+  location            = "global"
   scopes               = [azurerm_linux_web_app.main.id]
   description          = "Alert when HTTP 5xx errors occur"
 
