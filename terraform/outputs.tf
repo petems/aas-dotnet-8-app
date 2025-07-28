@@ -77,4 +77,30 @@ output "deployment_info" {
     location       = azurerm_resource_group.main.location
     environment    = var.environment
   }
+}
+
+
+
+# Monitoring outputs
+output "diagnostic_settings_name" {
+  description = "Name of the diagnostic settings"
+  value       = azurerm_monitor_diagnostic_setting.web_app.name
+}
+
+output "action_group_name" {
+  description = "Name of the action group for alerts"
+  value       = var.enable_alerts ? azurerm_monitor_action_group.main[0].name : null
+}
+
+
+
+# Logging URLs
+output "log_analytics_workspace_url" {
+  description = "URL to access Log Analytics workspace"
+  value       = "https://portal.azure.com/#@/resource${azurerm_log_analytics_workspace.main.id}/overview"
+}
+
+output "application_insights_url" {
+  description = "URL to access Application Insights"
+  value       = "https://portal.azure.com/#@/resource${azurerm_application_insights.main.id}/overview"
 } 

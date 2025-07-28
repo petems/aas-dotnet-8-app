@@ -73,4 +73,27 @@ variable "additional_tags" {
   description = "Additional tags to apply to resources"
   type        = map(string)
   default     = {}
-} 
+}
+
+# Monitoring and alerting variables
+variable "enable_alerts" {
+  description = "Enable monitoring alerts"
+  type        = bool
+  default     = true
+}
+
+variable "alert_email_addresses" {
+  description = "Email addresses to send alerts to"
+  type        = list(string)
+  default     = []
+}
+
+variable "log_retention_days" {
+  description = "Number of days to retain logs"
+  type        = number
+  default     = 30
+  validation {
+    condition     = var.log_retention_days >= 1 && var.log_retention_days <= 365
+    error_message = "Log retention days must be between 1 and 365."
+  }
+}
